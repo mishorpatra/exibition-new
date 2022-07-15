@@ -1,0 +1,179 @@
+API: Building Data
+URL Example: https://inclunav.apps.iitd.ac.in/node/wayfinding/v1/navigation-data/IIT/ASSIT/null
+API Response: [
+    {
+        "type": "Feature",
+        "feature_type": "unit",
+        "geomtery": {
+            "type": "Point"
+        },
+        "properties": {
+            "motion": "undefined",
+            "doorGroup": "Room Door",
+            "daysOpen": "undefined",
+            "latitude": "undefined",
+            "coordinates": "36,71",
+            "doorType": "undefined",
+            "roomName": "Assistech",
+            "openingMechanism": "undefined",
+            "node": "7420",
+            "protocol": "undefined",
+            "timings": "undefined",
+            "doorMaterial": "undefined",
+            "startTime": "undefined",
+            "endTime": "undefined",
+            "floor": "ground",
+            "direction": "undefined",
+            "contactNo": "undefined",
+            "longitude": "undefined",
+            "floorElement": "Rooms",
+            "buildingName": "ASSIT",
+            "venueName": "IIT"
+        }
+    },
+    {
+        "type": "Feature",
+        "feature_type": "unit",
+        "geomtery": {
+            "type": "Point"
+        },
+        "properties": {
+            "latitude": "undefined",
+            "coordinates": "51,51",
+            "type": "Lift",
+            "callLocation": "undefined",
+            "capacity": "undefined",
+            "node": "5355",
+            "name": "Lift-1",
+            "brailleAvailability": "undefined",
+            "audio": "undefined",
+            "wheelChairAccessibility": "undefined",
+            "floor": "ground",
+            "longitude": "undefined",
+            "panelDir": "undefined",
+            "floorElement": "FloorConnection",
+            "buildingName": "ASSIT",
+            "venueName": "IIT"
+        }
+    },
+    {
+        "type": "Feature",
+        "feature_type": "unit",
+        "geomtery": {
+            "type": "Point"
+        },
+        "properties": {
+            "node": "3723",
+            "approxHeight": "undefined",
+            "tapDirection": "undefined",
+            "tapType": "undefined",
+            "coordinates": "83,35",
+            "floor": "ground",
+            "type": "Drinking Water | Non Drinking",
+            "floorElement": "Services",
+            "buildingName": "ASSIT",
+            "venueName": "IIT"
+        }
+    },
+    {
+        "type": "Feature",
+        "feature_type": "unit",
+        "geomtery": {
+            "type": "Polygon"
+        },
+        "properties": {
+            "accessibleLinks": [
+                "9296,9202,9197,9199,9198,9200,9201,9194,9195,9196,9193,9192,9207,9204,9205,9206,9203,9210,9208,9209,9211,9212,9213,9317,9318",
+                "9296,9202,9197,9199,9198,9200,9201,9194,9195,9196,9193,9192,9207,9204,9205,9206,9203,9210,9208,9209,9211,9212,9213,9317,9318"
+            ],
+            "accessiblePolygonId": [
+                "23c83ad-8cc5-f37-ece4-faf6220bc4c",
+                "23c83ad-8cc5-f37-ece4-faf6220bc4c"
+            ],
+            "fileName": "e3d18bdb-246e-48ee-84fe-5ccc0c01e662_IIT-ASSIT-ground_0th Floor_New.png",
+            "grid_1": [
+                "9186,7210,8146,7626,7834,7730,7938,8042,7418,7522,7314,8666,8354,8458,8562,8250,8874,8770,8978,9082,6274,6690,6482,6586,6378,6898,6794,7002,7106,5754,5962,5858,6066,6170,5546,5650,5442,5338,5321,5329,5325,5327,5326,5328,5323,5324,5322,5333,5331,5332,5330,5335,5334,5336,5337,5313,5317,5315,5316,5314,5319,5318,5320,5309,5311,5310,5312,5307,5308,5306,5305,5825,5513,5617,5721,5409,6033,5929,6137,6241,6345,6349,6347,6348,6346,6351,6350,6352,6353,6354,7706,6978,7290,7082,7186,7498,7394,7602,6666,6770,6874,6458,6562,8434,8018,8226,8122,8330,7810,7914,8746,8538,8642,8954,8850,9058,9162,9174,9168,9171,9169,9170,9172,9173,9165,9166,9167,9163,9164,9180,9177,9178,9179,9175,9176,9183,9181,9182,9184,9185"
+            ],
+            "breadth": "104",
+            "organization": "IIT",
+            "polygonId": [
+                "862d0d4-f4-a16-46bb-a20e77e2458"
+            ],
+            "length": "104",
+            "floor": "ground",
+            "flr_dist_matrix": [
+                "0"
+            ],
+            "frConn": [
+                "51,51"
+            ],
+            "floorElement": "Floor",
+            "buildingName": "ASSIT",
+            "venueName": "IIT"
+        }
+    }
+]
+
+Note: Every element of object consist of 2 common properties that is:
+        "type": "Feature",
+        "feature_type": "unit"
+
+It will be require for mapping data on worldmap in future
+        "geomtery": {
+            "type": "Point"
+        }
+geometry: are of two type
+a.  Point: If floor element is of Rooms,Services or Floor Connection type then geomtery type will have point value
+    property atteibute of all the elements properties are defined as follows:
+    1. Properties: it will be different for different floor element
+    2. node: value of that element on canvas
+    3. coordinates: X,Y value of the nodes on canvas
+    4. buildingName: name of the building
+    5. venueName: name of venue
+    6. floor: floor number
+    7. floorElement: type of floor element whether it is Rooms,Services,FloorConnecttion,Non Walkable Region,Accessiblity Region
+
+b. Polygon: If floor element is of Polygons,accessibleLinks type then geomtery type will have Polygon value
+    1. Properties: it will be different for different floor element
+    2. node: value of that element on canvas
+    3. coordinates: X,Y value of the nodes on canvas
+    4. buildingName: name of the building
+    5. venueName: name of venue
+    6. floor: floor number
+    7. floorElement: type of floor element whether it is Rooms,Services,FloorConnecttion,Non Walkable Region,Accessiblity Region.These ara as follows   
+        i. floorElement:Rooms
+            "motion": "motion of door",
+            "doorGroup": "whether it is Building Entry,Room Door etc",
+            "daysOpen": "number of days doors are open",
+            "latitude": "latitude of floor element",
+            "coordinates": X,Y coordinates of floor element on canvas,
+            "doorType": "type of door",
+            "roomName": name of room door or building entrance door it will used when user will be searching his or her source or destination,
+            "openingMechanism": "opening mechanis of door",
+            "node": "value os element on canvas",
+            "protocol": "access of floor element",
+            "timings": "",
+            "doorMaterial": "door material ",
+            "startTime": "opening time of room ",
+            "endTime": "closing time of room",
+            "floor": "floor element",
+            "direction": "facing driection",
+            "contactNo": "room admin contact",
+            "longitude": "global latitude value",
+            "floorElement": "Rooms",
+            "buildingName": "building name",
+            "venueName": "venue name"
+
+Note: Inorder to distinguish between floor elements that is to identify which one are Rooms,Floor Connection,Services and Non Walkable polygon.geomtery type will be helpful
+    property atteibute of all the elements properties are defined as follows:
+    1. accessibleLinks: List of nodes of all accesible element of building 
+    2. fileName: image file of that floor
+    3. grid_1: array of all non walkable element
+    4. length: length of floor
+    5. breadth: width of floor
+    6. floor: floor number 
+    7. flr_dist_matrix: floor distance matrix
+    8. frConn: array of floor connection on floor
+
+
+    

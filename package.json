@@ -1,0 +1,87 @@
+{
+  "name": "navigation_app",
+  "version": "4.0.0",
+  "homepage": "https://inclunav.apps.iitd.ac.in/exibition-new",
+  "private": true,
+  "dependencies": {
+    "@emotion/css": "^11.1.3",
+    "@material-ui/core": "^4.12.4",
+    "@material-ui/icons": "^4.11.3",
+    "@material-ui/lab": "^4.0.0-alpha.61",
+    "@testing-library/jest-dom": "^5.11.6",
+    "@testing-library/react": "^11.2.2",
+    "@testing-library/user-event": "^12.5.0",
+    "axios": "^0.21.1",
+    "emotion": "^11.0.0",
+    "esri-leaflet": "^2.5.3",
+    "jquery": "^3.6.0",
+    "jwt-decode": "^3.1.2",
+    "jwt-encode": "^1.0.1",
+    "konva": "^7.2.5",
+    "leaflet": "^1.6.0",
+    "leaflet-control-geocoder": "^2.1.0",
+    "leaflet-realtime": "^2.1.3",
+    "leaflet-routing-machine": "^3.2.12",
+    "lrm-graphhopper": "^1.3.0",
+    "mapmyindia-react": "^1.0.6",
+    "object-hash": "^2.2.0",
+    "prop-types": "^15.8.1",
+    "radium": "^0.26.1",
+    "react": "^17.0.1",
+    "react-autosuggest": "^10.1.0",
+    "react-bootstrap-typeahead": "^5.1.4",
+    "react-dom": "^17.0.1",
+    "react-drag-drawer": "^3.3.4",
+    "react-konva": "^17.0.1-3",
+    "react-leaflet": "^2.8.0",
+    "react-modal": "^3.12.1",
+    "react-redux": "^7.2.2",
+    "react-responsive-modal": "^6.0.1",
+    "react-router-dom": "^6.3.0",
+    "react-scripts": "4.0.1",
+    "react-speech-recognition": "^3.6.0",
+    "react-web-share": "^1.1.6",
+    "redux": "^4.0.5",
+    "redux-thunk": "^2.3.0",
+    "thunk": "0.0.1",
+    "web-vitals": "^0.2.4",
+    "workbox-background-sync": "^5.1.4",
+    "workbox-broadcast-update": "^5.1.4",
+    "workbox-cacheable-response": "^5.1.4",
+    "workbox-core": "^5.1.4",
+    "workbox-expiration": "^5.1.4",
+    "workbox-google-analytics": "^5.1.4",
+    "workbox-navigation-preload": "^5.1.4",
+    "workbox-precaching": "^5.1.4",
+    "workbox-range-requests": "^5.1.4",
+    "workbox-routing": "^5.1.4",
+    "workbox-strategies": "^5.1.4",
+    "workbox-streams": "^5.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "linuxBuild": "GENERATE_SOURCEMAP=false react-scripts build",
+    "winBuild": "set \"GENERATE_SOURCEMAP=false\" && react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

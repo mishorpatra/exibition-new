@@ -1,0 +1,13 @@
+1. Description: send otp to client side
+   API Url: https://indoor-otp.herokuapp.com/otp/start-verify
+   Request Type: POST 
+   Params: {mobileNumber:mobileNumber}
+
+2. Description: verify otp on server
+   API Url: https://indoor-otp.herokuapp.com/otp/check-otp
+   Request Type: POST 
+   Params: {mobileNumber:mobileNumber,otp:otp}
+
+   pure
+   impure
+   sideffect
