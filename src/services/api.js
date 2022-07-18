@@ -124,6 +124,14 @@ export const addUser = async (post) => {
     }
 }
 
+export const addUserThroughMail = async (post) => {
+    try {
+        return await axios.post(`${neo4jURL}/user-register`, post)
+    } catch (error) {
+        console.log('Error while adding the user', error)
+    }
+}
+
 /*export const addDevice = async (device) => {
     try {
         const post = { device_code: device }

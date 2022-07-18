@@ -77,3 +77,29 @@
   align-items: center;
   margin-top: 10px;
 }
+.MuiAutocomplete-input:first-child {
+  height: auto !important;
+}
+
+.or {
+  position: relative;
+  text-align:center;
+  height: max-content !important;
+}
+.or:before {
+  background-color: #bbb;
+  content: "";
+  height: 1px;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 50%;
+}
+.or span {
+  color: #bbb;
+  text-transform: 'lowercase';
+  display: inline-block;
+  padding: 0 2px;
+  position: relative;
+  text-align: center;
+}

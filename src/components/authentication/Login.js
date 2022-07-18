@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Box, Typography, TextField, Button, makeStyles, CircularProgress, Toolbar, AppBar, Dialog } from '@material-ui/core'
 import { WbSunny, Brightness3 } from '@material-ui/icons'
 import { Link, useNavigate } from 'react-router-dom'
-import { signIn, addUser } from '../../services/api'
+import { signIn, addUser, addUserThroughMail } from '../../services/api'
 import jwt_decode from 'jwt-decode'
 import axios from 'axios'
 
@@ -52,7 +52,7 @@ const useStyle = makeStyles(theme => ({
         textTransform: 'capitalize',
         color: '#000',
         height: 64,
-        width: 276,
+        width: 240,
         borderRadius: 8,
         fontWeight: 700,
         fontSize: 24,
@@ -163,18 +163,18 @@ const Login = ({ setUser, user, darkmode, setDarkmode }) => {
     }
 
     async function handleCallbackResponse(response) {
-        console.log("Encoded JWT ID token: " + response.credential)
+        //console.log("Encoded JWT ID token: " + response.credential)
         var userObject = jwt_decode(response.credential)  //userObject.jti is the id    
         setUser(userObject)
-        let resp = await axios.post('http://localhost:8000/exist', {mobileNumber: userObject.email})
-        if(resp.data.status) {
-        await addUser({
+        //let resp = await axios.post('http://localhost:8000/exist', {mobileNumber: userObject.email})
+       // if(resp.data.status) {
+        await addUserThroughMail({
                 name: userObject.name,
                 email: userObject.email,
                 mobile: '',
                 password: '',
             })
-        }
+        //}
         setSuccess(true)
         setTimeout(() => {
             navigate('/')

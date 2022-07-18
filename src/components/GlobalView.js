@@ -1,9 +1,9 @@
 import React, {useEffect, useRef, useState} from 'react'
-import { Map, TileLayer, Marker, Polygon, Polyline, ZoomControl } from 'react-leaflet';
+import { Map, TileLayer, Marker, Polygon, Polyline } from 'react-leaflet';
 import { Icon } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { makeStyles, Box, Typography, Button, Dialog } from '@material-ui/core'
-import { Phone, Email, Language, ArrowBack, RateReview, LocationSearching, Apartment, Share } from '@material-ui/icons'
+import { Phone, Email, Language, ArrowBack, RateReview, LocationSearching, Apartment, Share, Directions } from '@material-ui/icons'
 import useWindowDimensions from '../services/getWindowSize';
 import useGeoLocation from '../services/useGeoLocation';
 import axios from 'axios'
@@ -142,6 +142,10 @@ const beacon = new Icon({
 const locateIcon = new Icon({
   iconUrl: 'https://i.imgur.com/HeSTMy6.png',
   iconSize: [25, 25]
+})
+const select = new Icon({
+  iconUrl: 'https://i.imgur.com/OwQ2Wsc.gif',
+  iconSize: [32, 32]
 })
 
 var inx = 0
@@ -338,6 +342,19 @@ const GlobalView = ({coordinates,
                   ]}
                 ></Marker>
           )}
+
+          {
+            landmarkData &&
+            open &&
+            <Marker
+              title={landmarkData.name}
+              icon={select}
+              position={[
+                landmarkData.properties.latitude,
+                landmarkData.properties.longitude
+              ]}
+              />
+          }
      
 
         <Box className={classes.lift} style={{bottom: open? '16%': '1%'}}>
@@ -361,6 +378,7 @@ const GlobalView = ({coordinates,
               <Typography style={{ fontSize: 17, fontWeight: 600, color: darkmode ? '#fff' : '#222'}}>{landmarkData.name}</Typography>
               <Typography style={{color: darkmode ? '#fff': '#222', marginBottom: 10, padding: '0 10px'}}>{address.address.Match_addr}</Typography>
               <Box className={classes.connect}>
+                <a className={classes.option}><Directions style={{fontSize: 40}} /></a>
                 {landmarkData.properties.contactNo && <a href={`tel:${landmarkData.properties.contactNo}`} title='make a call' className={classes.option}><Phone /></a>}
                 {landmarkData.properties.email && <a href={`https://mail.google.com/mail/?view=cm&fs=1&tf=1&to=${landmarkData.properties.email}`} target="_blank" title='send an email' className={classes.option}><Email /></a>}
                 {landmarkData.properties.url && <a href={`${landmarkData.properties.url}`} target='_blank' title={`go to ${landmarkData.name} website`} className={classes.option}><Language /></a>}

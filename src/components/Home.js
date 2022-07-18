@@ -22,21 +22,11 @@ const useStyles = makeStyles((theme) => ({
       minWidth: 120,
     },
     component: {
-        height: '100vh',
+        height: '93vh',
         width: '100vw',
     },
     formControl: {
         minWidth: 150
-    },
-    container: {
-        width: '100%',
-        display: 'flex',
-        justifyContent: 'space-evenly',
-        zIndex: 999,
-        wrap: 'wrap',
-        [theme.breakpoints.down('sm')]: {
-            flexDirection: 'column'
-        }
     },
     inputBx: {
         width: '100%',
@@ -100,7 +90,7 @@ const useStyles = makeStyles((theme) => ({
       },
     container: {
       background: '#222',
-      height: '93%',
+      height: '100% !important',
       width: '100%',
       marginTop: 64,
       display: 'flex',
@@ -108,7 +98,7 @@ const useStyles = makeStyles((theme) => ({
       alignItems: 'center',
       [theme.breakpoints.down('sm')]: {
         marginTop: 56,
-        height: '93.5%'
+        height: '94%'
      },
       '&>*': {
           color: '#000',
@@ -121,14 +111,13 @@ const useStyles = makeStyles((theme) => ({
       },
     },
     toolbar: {
-        width: '100%',
-        display: 'flex',
         justifyContent: 'space-between'
     },
     searchBx: {
         width: '100%', 
         display: 'flex', 
         justifyContent: 'center',
+        height: '2.8em',
         [theme.breakpoints.down('sm')]: {
             width: '70%'
         }
@@ -174,6 +163,19 @@ const useStyles = makeStyles((theme) => ({
         flexDirection: 'column',
         justifyContent: 'space-between',
         alignItems: 'center'
+    },
+    small: {
+        height: 'max-content',
+        color: '#bbb'
+    },
+    searchV: {
+        border: '2px solid #bbb !important',
+        height: '2.7em',
+        paddingLeft: 10,
+        width: 300,
+        '&:focus': {
+            outline: 'none'
+        },
     }
   }));
 
@@ -190,7 +192,7 @@ const Home = ({ darkmode, setDarkmode }) => {
       }, []);*/
 //const navigate = useNavigate()
 
-   //console.log(localStorage)
+   //console.log(JSON.parse(localStorage.user))
    if(!localStorage.user || localStorage.user == 'undefined') navigate('/signin')
 
     const { width } = useWindowDimentions()
@@ -218,6 +220,8 @@ const Home = ({ darkmode, setDarkmode }) => {
     const [check, setCheck] = useState(false)
     const [listview, setListview] = useState(false)
     const [sortedblist, setSortedblist] = useState()
+    const [searchv, setSearchv] = useState('')
+    const [searchb, setSearchb] = useState('')
     
     useEffect(() => {
         const fetchVenues = async () => {
@@ -426,10 +430,10 @@ const Home = ({ darkmode, setDarkmode }) => {
         <Box className={classes.component}>
          
             <AppBar className={classes.navBar} id='nav_bar' style={{background: darkmode ? '#27282d' : '#fff'}} >
-                <Toolbar className={classes.Toolbar} >
+                <Toolbar className={classes.toolbar} >
                 <Box title='back button'><ArrowBack  onClick={() => handleBack()} title='back' className={classes.arrows} style={{color: darkmode ? '#fff' : '#222'}}/></Box>
-                {!venue && !openSettings && <Typography style={{width: '100%', color: darkmode ? '#fff' : '#222'}}>Select Venue</Typography>}
-                {venue && !building && !openSettings && <Typography style={{width: '100%', color: darkmode ? '#fff' : '#222'}}>Select Building</Typography>}
+                {!venue && !openSettings && <input type='text' className={classes.searchV} style={{color: !darkmode? '#000':'inherit'}} onChange={(e) => setSearchv(e.target.value)} placeholder='Search for venues...' />}
+                {venue && !building && !openSettings && <input type='text' className={classes.searchV} style={{color: !darkmode? '#000':'inherit'}} onChange={(e) => setSearchb(e.target.value)} placeholder='Search for buildings...' />}
                 {openSettings && <Typography style={{width: '100%', color: darkmode ? '#fff' : '#222'}} >Settings</Typography>}
                 {
                     venue && 
@@ -509,10 +513,18 @@ const Home = ({ darkmode, setDarkmode }) => {
                 !venue && 
                 !openSettings &&
                 <Box className={classes.container} style={{background: !darkmode ? '#efefef' : '#222'}}>
+                    <Box className={classes.autoselect} onClick={() => autoselect()}>
+                            <Typography style={{
+                                color: darkmode ? '#fff':'#2fc2ad', 
+                                 }}>Autoselect</Typography>
+                            <LocationSearching style={{color: darkmode ? '#fff':'#2fc2ad'}} />
+                        </Box>
+                        <div className='or'><span style={{background: darkmode? '#222':'#efefef'}}>or</span></div>
+                        <Typography className={classes.small}>Select venue from the list</Typography>
                         {
                             venues.data.map(venueData => (
-                                !venueData.data ? <Button style={{background: '#2fc8ad', color: !darkmode ? '#efefef' : '#222'}}  onClick={() => handleChange(venueData)} title={venueData.venueName} >{camelToTitle(venueData.venueName)}</Button>:
-                                <Button style={{background: '#2fc8ad', color: !darkmode ? '#efefef' : '#222',}} className={classes.venueBtn} onClick={() => handleChange(venueData.data)} title={venueData.data.venueName} >
+                                //!venueData.data ? <Button style={{background: '#2fc8ad', color: !darkmode ? '#efefef' : '#222'}}  onClick={() => handleChange(venueData)} title={venueData.venueName} >{camelToTitle(venueData.venueName)}</Button>:
+                                venueData.data.venueName.toLowerCase().includes(searchv.toLowerCase()) && <Button style={{background: '#2fc8ad', color: !darkmode ? '#efefef' : '#222',}} className={classes.venueBtn} onClick={() => handleChange(venueData.data)} title={venueData.data.venueName} >
                                     <Typography>{camelToTitle(venueData.data.venueName)}</Typography>
                                     <Box className={classes.travel} title={`by walk ${walkTime(venueData.distance)}`}>
                                         <Typography style={{textTransform: 'lowercase'}}>{venueData.distance<1 ? `${Math.round(venueData.distance*1000)} m`:`${Math.round(venueData.distance)} km`}</Typography>
@@ -521,12 +533,6 @@ const Home = ({ darkmode, setDarkmode }) => {
                                 </Button>
                             ))
                         }
-                        <Box className={classes.autoselect} onClick={() => autoselect()}>
-                            <Typography style={{
-                                color: darkmode ? '#fff':'#2fc2ad', 
-                                 }}>Autoselect</Typography>
-                            <LocationSearching style={{color: darkmode ? '#fff':'#2fc2ad'}} />
-                        </Box>
                 </Box>
             }
             {
@@ -535,7 +541,7 @@ const Home = ({ darkmode, setDarkmode }) => {
                 <Box className={classes.container} style={{background: !darkmode ? '#efefef' : '#222'}}>
                     {
                         sortedblist.map(bdata => (
-                            <Button className={classes.venueBtn} style={{background: '#2fc8ad', color: !darkmode ? '#efefef' : '#222'}} onClick={() => handleChangeBuilding(bdata.buildingName)} title={bdata.buildingName} >
+                            bdata.buildingName.toLowerCase().includes(searchb.toLowerCase()) && <Button className={classes.venueBtn} style={{background: '#2fc8ad', color: !darkmode ? '#efefef' : '#222'}} onClick={() => handleChangeBuilding(bdata.buildingName)} title={bdata.buildingName} >
                                 <Typography>{camelToTitle(bdata.buildingName)}</Typography>
                                 <Box className={classes.display} title={`by walk ${walkTime(bdata.distance)}`}>
                                     <Typography style={{textTransform: 'lowercase'}}>{bdata.distance<1 ? `${Math.round(bdata.distance*1000)} m` : `${Math.round(bdata.distance)} km`}</Typography>
