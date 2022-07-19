@@ -47,7 +47,7 @@ export const getRoomsData = async (venue_name, building_name) => {
         //polygon data or nonwalkables of all floors
         
         let poly_data = data.slice(data.length - floors.length,data.length);
-        console.log(poly_data.global)
+       // console.log(poly_data.global)
         let red_data = data.slice(0, data.length - floors.length);
         // console.log(floors);
         let fdata=poly_data.map(s=>s.floor)

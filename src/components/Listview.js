@@ -70,7 +70,7 @@ const Listview = ({
     //console.log(newFloors)
     if(poly_data) fdata=poly_data.map(s=>s.floor)
 
-    console.log(venue)
+    //console.log(venue)
     if(value) return (
         <Box className={classes.component} style={{background: darkmode ? '#222':'#fff'}}>
             <Details 

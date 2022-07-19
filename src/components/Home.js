@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import { Box, makeStyles, Typography, AppBar, Toolbar, TextField, Dialog, Button, CircularProgress, Backdrop } from '@material-ui/core'
-import { ArrowBack, ExitToApp, Settings, ListAlt, Map, Brightness3, WbSunny, LocationSearching, DirectionsWalk } from '@material-ui/icons'
+import { ArrowBack, ExitToApp, Settings, ListAlt, Map, Brightness3, WbSunny, LocationSearching, DirectionsWalk, Schedule } from '@material-ui/icons'
 import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
 import {  getVenues, getRoomsData, getBuildingData, getGlobalCoords, getDevice } from '../services/api';
 import useWindowDimentions from '../services/getWindowSize'
@@ -103,7 +103,7 @@ const useStyles = makeStyles((theme) => ({
       '&>*': {
           color: '#000',
           height: 60,
-          width: 250,
+          width: 340,
           marginTop: 10,
           borderRadius: 8,
           fontSize: 16,
@@ -160,22 +160,30 @@ const useStyles = makeStyles((theme) => ({
     },
     travel: {
         display: 'flex',
-        flexDirection: 'column',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        '&>*': {
+            padding: '0 5px',
+            borderLeft: '2px solid #000'
+        }
+
     },
     small: {
         height: 'max-content',
         color: '#bbb'
     },
     searchV: {
-        border: '2px solid #bbb !important',
+        border: '2px solid #2fc2ad !important',
         height: '2.7em',
         paddingLeft: 10,
-        width: 300,
+        width: 340,
         '&:focus': {
             outline: 'none'
         },
+        [theme.breakpoints.up('sm')]: {
+             position: 'relative',
+             left: 23,
+        }
     }
   }));
 
@@ -265,9 +273,6 @@ const Home = ({ darkmode, setDarkmode }) => {
     }*/
 
     const handleChange = (event) => {
-        console.log(event)
-        setVenue(event)
-        setOpenBuilding(true)
         if(event.coordinates) setCoordinates([event.coordinates[0], event.coordinates[1]])
         setFloorPlan(null)
        // await fetchBuildings(event.target.value.venueName)
@@ -277,7 +282,7 @@ const Home = ({ darkmode, setDarkmode }) => {
            let response = await getBuildingData(event.venueName, bname, floor)
            var lat = 0
            var lng = 0
-           response.coordinates.map(crds => {
+           response?.coordinates.map(crds => {
                lat += parseFloat(crds.globalRef.lat)
                lng += parseFloat(crds.globalRef.lng)
            })
@@ -291,19 +296,23 @@ const Home = ({ darkmode, setDarkmode }) => {
            })
            if(idx == event.buildingList.length-1) {
               arr.sort((a,b) => {
-               return a.distance - b.distance
+               return a.distance*100 - b.distance*100
               })
-              setSortedblist(arr)
+              if(event.buildingList.length === arr.length) setSortedblist(arr)
+              else handleChange(event)
+              if(arr.length > 1 && arr[0].distance > arr[1].distance) handleChange(event)
               //await handleChangeBuilding(arr[0].buildingName)
            }
+        
        })
+       setVenue(event)
     };
     const handleChangeBuilding = async (event) => {
         setBackdrop(true)
         setBuilding(event)
         setFloor('ground')
         setValue()
-        console.log(venues)
+       // console.log(venues)
         let response = await getBuildingData(venue.venueName || venues.data[0].data.venueName, event, floor)
         //console.log(response)
         setFloorPlan(response)
@@ -339,7 +348,11 @@ const Home = ({ darkmode, setDarkmode }) => {
         if(openSettings) setOpenSettings(false)
         else {
             if(building) setBuilding(null)
-            if(!building && venue) setVenue('')
+            if(!building && (venue||sortedblist)) {
+                setVenue(null)
+                setSortedblist(null)
+                setFloorPlan(null)
+            }
         }
     }
 
@@ -503,7 +516,7 @@ const Home = ({ darkmode, setDarkmode }) => {
                         )}
                     /></Box>}
                     <Box style={{display: 'flex'}}>
-                        {venue && building && <Box title={!listview ? 'switch to list view':'switch to map view'}>{ listview ? <ListAlt onClick={() => setListview(!listview)} className={classes.arrows} style={{marginLeft: 10, cursor: 'pointer', color: darkmode ? '#fff' : '#222'}} />:<Map onClick={() => setListview(!listview)} className={classes.arrows} style={{marginLeft: 10, cursor: 'pointer', color: darkmode ? '#fff' : '#222'}} /> }</Box>}
+                        <Box title={!listview ? 'switch to list view':'switch to map view'}>{ listview ? <ListAlt onClick={() => setListview(!listview)} className={classes.arrows} style={{marginLeft: 10, cursor: 'pointer', color: darkmode ? '#fff' : '#222'}} />:<Map onClick={() => setListview(!listview)} className={classes.arrows} style={{marginLeft: 10, cursor: 'pointer', color: darkmode ? '#fff' : '#222'}} /> }</Box>
                         {!openSettings && <Box title='settings'><Settings className={classes.arrows} style={{marginLeft: 10, cursor: 'pointer', color: darkmode ? '#fff' : '#222'}} title='settings' onClick={() => handleSettings()} /></Box>}
                     </Box>
             </Toolbar>
@@ -524,27 +537,40 @@ const Home = ({ darkmode, setDarkmode }) => {
                         {
                             venues.data.map(venueData => (
                                 //!venueData.data ? <Button style={{background: '#2fc8ad', color: !darkmode ? '#efefef' : '#222'}}  onClick={() => handleChange(venueData)} title={venueData.venueName} >{camelToTitle(venueData.venueName)}</Button>:
-                                venueData.data.venueName.toLowerCase().includes(searchv.toLowerCase()) && <Button style={{background: '#2fc8ad', color: !darkmode ? '#efefef' : '#222',}} className={classes.venueBtn} onClick={() => handleChange(venueData.data)} title={venueData.data.venueName} >
+                                venueData.data.venueName.toLowerCase().includes(searchv.split(' ').join('').toLowerCase()) && <Button style={{background: '#2fc8ad', color: !darkmode ? '#efefef' : '#222',}} className={classes.venueBtn} onClick={() => handleChange(venueData.data)} title={venueData.data.venueName} >
                                     <Typography>{camelToTitle(venueData.data.venueName)}</Typography>
                                     <Box className={classes.travel} title={`by walk ${walkTime(venueData.distance)}`}>
-                                        <Typography style={{textTransform: 'lowercase'}}>{venueData.distance<1 ? `${Math.round(venueData.distance*1000)} m`:`${Math.round(venueData.distance)} km`}</Typography>
-                                        <Box style={{display: 'flex'}}><DirectionsWalk /><Typography style={{textTransform: 'lowercase'}}>{walkTime(venueData.distance)}</Typography></Box>
+                                        <Box style={{display: 'flex'}}><DirectionsWalk style={{fontSize: 20}} /><Typography style={{textTransform: 'lowercase'}}>{venueData.distance<1 ? `${Math.round(venueData.distance*1000)} m`:`${Math.round(venueData.distance)} km`}</Typography></Box>
+                                        <Box style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}><Schedule style={{fontSize: 20, marginRight: 2}} /><Typography style={{textTransform: 'lowercase'}}>{walkTime(venueData.distance)}</Typography></Box>
                                     </Box>
                                 </Button>
                             ))
                         }
                 </Box>
             }
+
+            {venue &&
+             !sortedblist && 
+             <Box className={classes.container} style={{background: !darkmode ? '#efefef' : '#222'}}>
+                    {
+                        venue.buildingList.map(bdata => (
+                            bdata.toLowerCase().includes(searchb.split(' ').join('').toLowerCase()) && <Button className={classes.venueBtn} style={{background: '#2fc8ad', color: !darkmode ? '#efefef' : '#222', justifyContent: 'center'}} onClick={() => handleChangeBuilding(bdata)} title={bdata} >
+                                <Typography>{camelToTitle(bdata)}</Typography>
+                            </Button>
+                        ))
+                    }
+                </Box>
+             }
             {
                 sortedblist &&
                 !openSettings &&
                 <Box className={classes.container} style={{background: !darkmode ? '#efefef' : '#222'}}>
                     {
                         sortedblist.map(bdata => (
-                            bdata.buildingName.toLowerCase().includes(searchb.toLowerCase()) && <Button className={classes.venueBtn} style={{background: '#2fc8ad', color: !darkmode ? '#efefef' : '#222'}} onClick={() => handleChangeBuilding(bdata.buildingName)} title={bdata.buildingName} >
+                            bdata.buildingName.toLowerCase().includes(searchb.split(' ').join('').toLowerCase()) && <Button className={classes.venueBtn} style={{background: '#2fc8ad', color: !darkmode ? '#efefef' : '#222'}} onClick={() => handleChangeBuilding(bdata.buildingName)} title={bdata.buildingName} >
                                 <Typography>{camelToTitle(bdata.buildingName)}</Typography>
-                                <Box className={classes.display} title={`by walk ${walkTime(bdata.distance)}`}>
-                                    <Typography style={{textTransform: 'lowercase'}}>{bdata.distance<1 ? `${Math.round(bdata.distance*1000)} m` : `${Math.round(bdata.distance)} km`}</Typography>
+                                <Box className={classes.travel} title={`by walk ${walkTime(bdata.distance)}`}>
+                                    <Box style={{display: 'flex'}}><Schedule /><Typography style={{textTransform: 'lowercase'}}>{bdata.distance<1 ? `${Math.round(bdata.distance*1000)} m` : `${Math.round(bdata.distance)} km`}</Typography></Box>
                                     <Box style={{display: 'flex'}}><DirectionsWalk /><Typography style={{textTransform: 'lowercase'}}>{walkTime(bdata.distance)}</Typography></Box>
                                 </Box>
                             </Button>
@@ -554,8 +580,6 @@ const Home = ({ darkmode, setDarkmode }) => {
             }
             {
                 !listview &&
-                venue &&
-                building &&
                 !openSettings &&
                 <GlobalView 
                     coordinates={coordinates} 
@@ -575,6 +599,10 @@ const Home = ({ darkmode, setDarkmode }) => {
                     check={check}
                     setCheck={setCheck}
                     setBackdrop={setBackdrop}
+                    venues={venues}
+                    handleChange={handleChange}
+                    sortedblist={sortedblist}
+                    setVenue={setVenue}
                     />
             }
             {

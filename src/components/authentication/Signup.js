@@ -43,12 +43,12 @@ const useStyle = makeStyles(theme =>({
         }
     },
     input: {
-        width: 241,
+        width: 240,
         height: 40,
         borderRadius: 8,
         marginBottom: 15,
         background: '#27282d',
-        border: '2px solid #fff',
+        border: '2px solid #2fc2ad !important',
         color: '#fff',
         fontSize: 18,
         padding: '11px 16px 16px 18px',
@@ -60,7 +60,7 @@ const useStyle = makeStyles(theme =>({
         textTransform: 'capitalize',
         color: '#000',
         height: 64,
-        width: 276,
+        width: 240,
         borderRadius: 8,
         fontWeight: 700,
         fontSize: 24,

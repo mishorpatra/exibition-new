@@ -82,7 +82,7 @@ const Details = ({
             <Typography className={classes.lmark} style={{color: darkmode ? '#222':'#fff', cursor: 'pointer'}} onClick={() => handleClick()}>{lmark.name}</Typography>
             <Collapse in={open} timeout="auto" unmountOnExit>
                 <Box margin={1} className={classes.details}>
-                    <Typography style={{color: darkmode ? '#222':'#fff'}}>{address?.address.Match_addr}</Typography>
+                    <Typography style={{color: darkmode ? '#222':'#fff'}}>{building} building, {lmark.floor} floor, {address?.address.Match_addr}</Typography>
                     <Box className={classes.connect} className='connections'>
                         {lmark.properties.contactNo && <a href={`tel:${lmark.properties.contactNo}`} title='make a call' className={classes.option}><Phone /></a>}
                         {lmark.properties.email && <a href={`https://mail.google.com/mail/?view=cm&fs=1&tf=1&to=${lmark.properties.email}`} target="_blank" title='send an email' className={classes.option}><Email /></a>}

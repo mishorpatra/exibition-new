@@ -8,7 +8,8 @@ import useWindowDimensions from '../services/getWindowSize';
 import useGeoLocation from '../services/useGeoLocation';
 import axios from 'axios'
 import { RWebShare } from 'react-web-share';
-
+import { camelToTitle } from '../services/neumericConvert';
+import { getBuildingData } from '../services/api';
 
 //components
 import Lift from './Lift'
@@ -88,6 +89,12 @@ const useStyle = makeStyles(theme => ({
         bottom: 50,
         right: '12%'
       }
+    },
+    anote: {
+      position: 'absolute', 
+      top: '50%', 
+      zIndex: 9999,
+      color: '#fff'
     }
   }))
 
@@ -96,8 +103,8 @@ const defaultZoom = 18
 
 
 const pin = new Icon({
-  iconUrl: 'https://img.icons8.com/external-smashingstocks-glyph-smashing-stocks/344/external-map-pin-user-interface-smashingstocks-glyph-smashing-stocks.png',
-  iconSize: [25, 25]
+  iconUrl: 'https://i.imgur.com/WZV5vzn.gif',
+  iconSize: [50, 50]
 })
 const path = new Icon({
   iconUrl: 'https://img.icons8.com/windows/344/square-full.png',
@@ -144,8 +151,8 @@ const locateIcon = new Icon({
   iconSize: [25, 25]
 })
 const select = new Icon({
-  iconUrl: 'https://i.imgur.com/OwQ2Wsc.gif',
-  iconSize: [32, 32]
+  iconUrl: 'https://i.imgur.com/g5A339S.gif',
+  iconSize: [120, 120]
 })
 
 var inx = 0
@@ -166,7 +173,11 @@ const GlobalView = ({coordinates,
                     setDarkmode,
                     check,
                     setCheck,
-                    setBackdrop }) => {
+                    setBackdrop,
+                    venues, 
+                    handleChange, 
+                    sortedblist,
+                    setVenue }) => {
 
     const { width } = useWindowDimensions()
     //console.log(darkmode)
@@ -175,9 +186,9 @@ const GlobalView = ({coordinates,
     const classes = useStyle()
    // console.log(value)
 
-
+    //rooms && console.log(rooms)
     //console.log(floor)
-    //floorplan && console.log(floorplan.coordinates)
+    //console.log(floorplan)
     //console.log(value)
     globalCoords && globalCoords.map(gc => {
       if(gc.floor === floor) inx = globalCoords.indexOf(gc)
@@ -191,6 +202,7 @@ const GlobalView = ({coordinates,
     const [current, setCurrent] = useState(null)
     const [address, setAddress] = useState()
     const [sharelink, setSharelink] = useState('')
+    const [vindex, setVindex] = useState(0)
 
     const handleLandmark = async (landmark) => {
       setBackdrop(true)
@@ -221,20 +233,58 @@ const GlobalView = ({coordinates,
       }
       }
 
+    const nextVenue = () => {
+      if(vindex == venues.data.length-1) setVindex(0)
+      else setVindex(vindex+1)
+    }
+    const prevVenue = () => {
+      if(vindex == 0) setVindex(venues.data.length-1)
+      else setVindex(vindex-1)
+    }
+
+    var buildingLayouts = []
    
-    return (coordinates && !floorplan)? (
-        <Map ref={mapRef} center={coordinates} zoom={defaultZoom} className={classes.mapView} scrollWheelZoom={true} dragging={true} duration={2} zoomControl={false}>
+    const handleChangeVenue = async (vdata) => {
+      handleChange(vdata.data)
+      setVenue(vdata.data)
+      vdata.data.buildingList.map(async bdata => {
+        let response = await getBuildingData(vdata.data.venueName, bdata, 'ground')
+        buildingLayouts.push(response)
+      })
+    }
+
+    return (coordinates && !floorplan && venues && !sortedblist)? (
+        <Map ref={mapRef} center={venues.data[vindex].data.coordinates} zoom={defaultZoom} className={classes.mapView} scrollWheelZoom={true} dragging={true} duration={2} zoomControl={false}>
             <TileLayer 
               url={ darkmode ? "https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png" : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'} 
               attribution="&copy; <a href=&quot;https://www.openstreetmap.org/copyright&quot;>OpenStreetMap</a> contributors"
               maxZoom={25}
               maxNativeZoom={19}
               />
-              <Box style={{marginBottom: 20}}>
-              </Box>
-            <Marker map={mapRef} position={coordinates} icon={pin} alt={venue.venueName} />
+              
+            {
+              venues.data.map(vdata => (
+                <Marker ref={mapRef} position={vdata.data.coordinates} icon={pin} title={camelToTitle(vdata.data.venueName)} onClick={() => {handleChangeVenue(vdata)}} />
+              ))
+            }
+            <Button variant='contained' className={classes.anote} style={{right: 10, background: '#1fc2ad'}} onClick={() => nextVenue()}>Next </Button>
+            <Button variant='contained' className={classes.anote} style={{left: 10, background: '#1fc2ad'}} onClick={() => prevVenue()}>Previous</Button>
         </Map>
-    ): (coordinates && floorplan && !globalCoords) ? (
+    ): (coordinates && !floorplan && venues && sortedblist) ? (
+        <Map ref={mapRef} center={venues.data[vindex].data.coordinates} zoom={defaultZoom} className={classes.mapView} scrollWheelZoom={true} dragging={true} duration={2} zoomControl={false}>
+              <TileLayer 
+                url={ darkmode ? "https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png" : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'} 
+                attribution="&copy; <a href=&quot;https://www.openstreetmap.org/copyright&quot;>OpenStreetMap</a> contributors"
+                maxZoom={25}
+                maxNativeZoom={19}
+                />
+                
+              
+              <Button variant='contained' className={classes.anote} style={{right: 10, background: "#1fc2ad"}} onClick={() => nextVenue()}>Next </Button>
+              <Button variant='contained' className={classes.anote} style={{left: 10, background: '#1fc2ad'}} onClick={() => prevVenue()}>Previous</Button>
+          </Map>
+    )
+    :(coordinates && floorplan && !globalCoords) ? (
       <Map ref={mapRef} 
           center={[
              (parseFloat(floorplan.coordinates[0].globalRef.lat)+parseFloat(floorplan.coordinates[2].globalRef.lat))/2, 
@@ -318,6 +368,7 @@ const GlobalView = ({coordinates,
       {
          landmarks && zoom>19 && landmarks.map(landmark => (
           landmark.properties.latitude && landmark.floor === floor && landmark.name && <Marker ref={mapRef} position={[landmark.properties.latitude, landmark.properties.longitude]}  title={landmark.name} onclick={() => handleLandmark(landmark)} icon={
+            landmarkData?.name == landmark.name ? noIcon :
             landmark.element.type=='Rooms' && (!value || value.title === 'Rooms') ? person :
             landmark.element.subType=='lift' && (!value ||  value.title === 'lift') ? lift :
             landmark.element.subType == 'stairs' && (!value || value.title === 'stairs') ? stairs :
@@ -369,6 +420,7 @@ const GlobalView = ({coordinates,
             value={value}
             check={check}
             setCheck={setCheck}
+            setLandmarkData={setLandmarkData}
             />
         </Box>
         <Box className={classes.dialog} style={{display: open ? 'block' : 'none', background: darkmode ? '#27282d' : '#eee'}}>
@@ -376,7 +428,7 @@ const GlobalView = ({coordinates,
             {landmarkData && 
             <Box >
               <Typography style={{ fontSize: 17, fontWeight: 600, color: darkmode ? '#fff' : '#222'}}>{landmarkData.name}</Typography>
-              <Typography style={{color: darkmode ? '#fff': '#222', marginBottom: 10, padding: '0 10px'}}>{address.address.Match_addr}</Typography>
+              <Typography style={{color: darkmode ? '#fff': '#222', marginBottom: 10, padding: '0 10px'}}>{building} building, {landmarkData.floor} floor, {address.address.Match_addr}</Typography>
               <Box className={classes.connect}>
                 <a className={classes.option}><Directions style={{fontSize: 40}} /></a>
                 {landmarkData.properties.contactNo && <a href={`tel:${landmarkData.properties.contactNo}`} title='make a call' className={classes.option}><Phone /></a>}

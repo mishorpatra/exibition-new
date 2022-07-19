@@ -11,7 +11,7 @@ import SharedView from './components/SharedView'
 
 const BaseRouter = ()=>{
 
-    const [darkmode, setDarkmode] = useState(true)
+    const [darkmode, setDarkmode] = useState(false)
     const [user, setUser] = useState()
     return(
     <Routes>   

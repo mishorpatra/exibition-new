@@ -49,7 +49,8 @@ const Lift = ({setLevel,
                rooms, 
                value,
                check,
-               setCheck
+               setCheck,
+               setLandmarkData
             }) => {
     const classes = useStyle()
     const [floor, setFloor] = useState(numToString(value?.data?.floor) || 0)
@@ -81,10 +82,12 @@ const Lift = ({setLevel,
         setLevel(step)
         document.querySelector(`#floor${e}`).style.background='#333'
        
+        setLandmarkData(null)
         let response = await getBuildingData(venue.venueName, building, step)
         setFloorPlan(response)
         response = await getRoomsData(venue.venueName, building, step)
         setRooms(response)
+        
     }
 
     const handleClickFilter = async (e, step) => {
