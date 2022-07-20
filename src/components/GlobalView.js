@@ -95,6 +95,13 @@ const useStyle = makeStyles(theme => ({
       top: '50%', 
       zIndex: 9999,
       color: '#fff'
+    },
+    autoselect: {
+      position: 'absolute', 
+      bottom: 20,
+      right: 20,
+      zIndex: 9999,
+      color: '#fff'
     }
   }))
 
@@ -154,6 +161,10 @@ const select = new Icon({
   iconUrl: 'https://i.imgur.com/g5A339S.gif',
   iconSize: [120, 120]
 })
+const selectBuilding = new Icon({
+  iconUrl: 'https://c.tenor.com/V994Pis5f7cAAAAi/location-maps.gif',
+  iconSize: [40, 40]
+})
 
 var inx = 0
 
@@ -177,7 +188,14 @@ const GlobalView = ({coordinates,
                     venues, 
                     handleChange, 
                     sortedblist,
-                    setVenue }) => {
+                    setVenue,
+                    handleChangeBuilding,
+                    blayout,
+                    setBlayout,
+                    autoselect,
+                    searchV,
+                    searchb
+                     }) => {
 
     const { width } = useWindowDimensions()
     //console.log(darkmode)
@@ -203,6 +221,7 @@ const GlobalView = ({coordinates,
     const [address, setAddress] = useState()
     const [sharelink, setSharelink] = useState('')
     const [vindex, setVindex] = useState(0)
+    const [bindex, setBindex] = useState(0)
 
     const handleLandmark = async (landmark) => {
       setBackdrop(true)
@@ -241,20 +260,34 @@ const GlobalView = ({coordinates,
       if(vindex == 0) setVindex(venues.data.length-1)
       else setVindex(vindex-1)
     }
+    const nextBuilding = () => {
+      if(bindex == sortedblist.length-1) setBindex(0)
+      else setBindex(bindex+1)
+    }
+    const prevBuilding = () => {
+      if(bindex == 0) setBindex(sortedblist.length-1)
+      else setBindex(bindex-1)
+    }
 
     var buildingLayouts = []
    
     const handleChangeVenue = async (vdata) => {
+      setBackdrop(true)
       handleChange(vdata.data)
       setVenue(vdata.data)
-      vdata.data.buildingList.map(async bdata => {
+      vdata.data.buildingList.map(async (bdata, idx) => {
         let response = await getBuildingData(vdata.data.venueName, bdata, 'ground')
-        buildingLayouts.push(response)
+        buildingLayouts.push({
+          buildingName: bdata,
+          layoutData: response})
+        if(idx == vdata.data.buildingList.length-1) setBlayout(buildingLayouts)
       })
+      setBackdrop(false)
     }
 
-    return (coordinates && !floorplan && venues && !sortedblist)? (
-        <Map ref={mapRef} center={venues.data[vindex].data.coordinates} zoom={defaultZoom} className={classes.mapView} scrollWheelZoom={true} dragging={true} duration={2} zoomControl={false}>
+    return  (
+      <>
+        {venues &&  <Map ref={mapRef} center={venues.data[vindex].data.coordinates} zoom={defaultZoom} className={classes.mapView} scrollWheelZoom={true} dragging={true} duration={2} zoomControl={false}>
             <TileLayer 
               url={ darkmode ? "https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png" : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'} 
               attribution="&copy; <a href=&quot;https://www.openstreetmap.org/copyright&quot;>OpenStreetMap</a> contributors"
@@ -264,14 +297,28 @@ const GlobalView = ({coordinates,
               
             {
               venues.data.map(vdata => (
-                <Marker ref={mapRef} position={vdata.data.coordinates} icon={pin} title={camelToTitle(vdata.data.venueName)} onClick={() => {handleChangeVenue(vdata)}} />
+                <Marker ref={mapRef} position={vdata.data.coordinates} icon={pin} title={camelToTitle(`${vdata.data.venueName} distance ${vdata.distance > 1? Math.round(vdata.distance)+' kilometeres': Math.round(vdata.distance*1000)+' meteres'}`)} onClick={() => {handleChangeVenue(vdata)}} />
               ))
             }
+            {location.loaded && !location.error && (
+                <Marker
+                  title='My location'
+                  icon={locateIcon}
+                  position={[
+                    location.coordinates.lat,
+                    location.coordinates.lng,
+                  ]}
+                ></Marker>
+          )}
             <Button variant='contained' className={classes.anote} style={{right: 10, background: '#1fc2ad'}} onClick={() => nextVenue()}>Next </Button>
             <Button variant='contained' className={classes.anote} style={{left: 10, background: '#1fc2ad'}} onClick={() => prevVenue()}>Previous</Button>
-        </Map>
-    ): (coordinates && !floorplan && venues && sortedblist) ? (
-        <Map ref={mapRef} center={venues.data[vindex].data.coordinates} zoom={defaultZoom} className={classes.mapView} scrollWheelZoom={true} dragging={true} duration={2} zoomControl={false}>
+            <Button variant='contained' className={classes.autoselect} style={{background: '#1fc2ad'}} onClick={() => autoselect()} >Autoselect <LocationSearching /></Button>
+        </Map>}
+    
+        {blayout  && <Map ref={mapRef} center={[
+          (parseFloat(blayout[bindex].layoutData.coordinates[0].globalRef.lat)+parseFloat(blayout[bindex].layoutData.coordinates[1].globalRef.lat)+parseFloat(blayout[bindex].layoutData.coordinates[2].globalRef.lat)+parseFloat(blayout[bindex].layoutData.coordinates[3].globalRef.lat))/4,
+          (parseFloat(blayout[bindex].layoutData.coordinates[0].globalRef.lng)+parseFloat(blayout[bindex].layoutData.coordinates[1].globalRef.lng)+parseFloat(blayout[bindex].layoutData.coordinates[2].globalRef.lng)+parseFloat(blayout[bindex].layoutData.coordinates[3].globalRef.lng))/4
+        ]} zoom={defaultZoom+1} className={classes.mapView} scrollWheelZoom={true} dragging={true} duration={2} zoomControl={false}>
               <TileLayer 
                 url={ darkmode ? "https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png" : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'} 
                 attribution="&copy; <a href=&quot;https://www.openstreetmap.org/copyright&quot;>OpenStreetMap</a> contributors"
@@ -279,47 +326,34 @@ const GlobalView = ({coordinates,
                 maxNativeZoom={19}
                 />
                 
+                {
+                  blayout && blayout.map(layout => (
+                    <>
+                    <Polygon color={darkmode ? '#404a40' : '#d3cabf'} opacity={0.1} fillOpacity={1} weight={1} lineCap="round" lineJoin='round' fill="#dad1c8" positions={
+                      [
+                        [layout.layoutData.coordinates[0].globalRef.lat, layout.layoutData.coordinates[0].globalRef.lng],
+                        [layout.layoutData.coordinates[1].globalRef.lat, layout.layoutData.coordinates[1].globalRef.lng],
+                        [layout.layoutData.coordinates[2].globalRef.lat, layout.layoutData.coordinates[2].globalRef.lng],
+                        [layout.layoutData.coordinates[3].globalRef.lat, layout.layoutData.coordinates[3].globalRef.lng],
+                      ]
+                    } onClick={() => handleChangeBuilding(layout.buildingName)}  />
+                    <Marker
+                      title={`${camelToTitle(layout.buildingName)}. Click this to enter into the building`}
+                      icon={selectBuilding}
+                      position={[
+                        (parseFloat(layout.layoutData.coordinates[0].globalRef.lat)+parseFloat(layout.layoutData.coordinates[1].globalRef.lat)+parseFloat(layout.layoutData.coordinates[2].globalRef.lat)+parseFloat(layout.layoutData.coordinates[3].globalRef.lat))/4,
+                        (parseFloat(layout.layoutData.coordinates[0].globalRef.lng)+parseFloat(layout.layoutData.coordinates[1].globalRef.lng)+parseFloat(layout.layoutData.coordinates[2].globalRef.lng)+parseFloat(layout.layoutData.coordinates[3].globalRef.lng))/4
+                      ]}
+                     onClick={() => handleChangeBuilding(layout.buildingName)} />
+                    </>
+                  ))
+                }
               
-              <Button variant='contained' className={classes.anote} style={{right: 10, background: "#1fc2ad"}} onClick={() => nextVenue()}>Next </Button>
-              <Button variant='contained' className={classes.anote} style={{left: 10, background: '#1fc2ad'}} onClick={() => prevVenue()}>Previous</Button>
-          </Map>
-    )
-    :(coordinates && floorplan && !globalCoords) ? (
-      <Map ref={mapRef} 
-          center={[
-             (parseFloat(floorplan.coordinates[0].globalRef.lat)+parseFloat(floorplan.coordinates[2].globalRef.lat))/2, 
-             (parseFloat(floorplan.coordinates[0].globalRef.lng)+parseFloat(floorplan.coordinates[2].globalRef.lng))/2
-            ]} 
-          zoom={ width<958 ? defaultZoom+1 : defaultZoom+2 } className={classes.mapView} scrollWheelZoom={true} dragging={true} duration={2} zoomControl={false}>
-
-            <TileLayer 
-              url={ darkmode ? "https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png" : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'} 
-              attribution="&copy; <a href=&quot;https://www.openstreetmap.org/copyright&quot;>OpenStreetMap</a> contributors"
-              maxZoom={25}
-              maxNativeZoom={19}
-              />
-            
-            
-            <Polygon color={darkmode ? '#404a40' : '#d3cabf'} opacity={0.1} fillOpacity={1} weight={1} lineCap="round" lineJoin='round' fill="#dad1c8" positions={
-              [
-                [floorplan.coordinates[0].globalRef.lat, floorplan.coordinates[0].globalRef.lng],
-                [floorplan.coordinates[1].globalRef.lat, floorplan.coordinates[1].globalRef.lng],
-                [floorplan.coordinates[2].globalRef.lat, floorplan.coordinates[2].globalRef.lng],
-                [floorplan.coordinates[3].globalRef.lat, floorplan.coordinates[3].globalRef.lng],
-              ]
-            } />
-            {/*< Polygon color='#000'  opacity={0.7} fillOpacity={0} weight={3} lineCap="round" lineJoin='round'  positions={
-             floorplan.parkingCoords.map(parks => {
-                return [parks.lat, parks.lon]
-              })
-            } />
-           <Marker ref={mapRef} position={[(parseFloat(floorplan.parkingCoords[0].lat)+parseFloat(floorplan.parkingCoords[2].lat)+parseFloat(floorplan.parkingCoords[1].lat))/3, (parseFloat(floorplan.parkingCoords[0].lon)+parseFloat(floorplan.parkingCoords[2].lon)+parseFloat(floorplan.parkingCoords[1].lon))/3]  } icon={parking} />
-           */}
-            <Box className={classes.lift}>
-              <Lift  setLevel={setFloor} setFloorPlan={setFloorPlan} venue={venue} building={building} setRooms={setRooms} rooms={rooms} />
-            </Box>
-        </Map>
-    ): <Map ref={mapRef} 
+              <Button variant='contained' className={classes.anote} style={{right: 10, background: "#1fc2ad"}} onClick={() => nextBuilding()}>Next </Button>
+              <Button variant='contained' className={classes.anote} style={{left: 10, background: '#1fc2ad'}} onClick={() => prevBuilding()}>Previous</Button>
+          </Map>}
+    
+    {globalCoords && <Map ref={mapRef} 
             center={current ? [current[0], current[1]] : [
               (parseFloat(floorplan.coordinates[0].globalRef.lat)+parseFloat(floorplan.coordinates[2].globalRef.lat))/2, 
              (parseFloat(floorplan.coordinates[0].globalRef.lng)+parseFloat(floorplan.coordinates[2].globalRef.lng))/2
@@ -354,7 +388,7 @@ const GlobalView = ({coordinates,
         } />
         <Marker ref={mapRef} position={[(parseFloat(floorplan.parkingCoords[0].lat)+parseFloat(floorplan.parkingCoords[2].lat)+parseFloat(floorplan.parkingCoords[1].lat))/3, (parseFloat(floorplan.parkingCoords[0].lon)+parseFloat(floorplan.parkingCoords[2].lon)+parseFloat(floorplan.parkingCoords[1].lon))/3]  } icon={parking} />*/}
          {
-            globalCoords[inx].global.map(glb_crd => (
+            globalCoords && globalCoords[inx].global.map(glb_crd => (
               <Polyline color='#000' opacity={1} weight={3} lineCap='round' lineJoin='round'  positions={
                 glb_crd.map(latlng => {
                   return [latlng[1], latlng[0]]
@@ -460,7 +494,8 @@ const GlobalView = ({coordinates,
         {location && <Button variant='contained' onClick={() => showMyLocation()} className={classes.locate} title={!current ? 'switch to my location' : 'switch to building location'} style={{background: '#222', bottom: open ? '16%':30}} >
           {!current ? <LocationSearching style={{color: '#fff'}} /> : <Apartment style={{color: '#fff'}} />}
         </Button>}
-    </Map>
-}
-
+    </Map> }
+    </>
+    )
+  }
 export default GlobalView

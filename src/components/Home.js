@@ -230,6 +230,7 @@ const Home = ({ darkmode, setDarkmode }) => {
     const [sortedblist, setSortedblist] = useState()
     const [searchv, setSearchv] = useState('')
     const [searchb, setSearchb] = useState('')
+    const [blayout, setBlayout] = useState()
     
     useEffect(() => {
         const fetchVenues = async () => {
@@ -273,11 +274,13 @@ const Home = ({ darkmode, setDarkmode }) => {
     }*/
 
     const handleChange = (event) => {
+        setBackdrop(true)
         if(event.coordinates) setCoordinates([event.coordinates[0], event.coordinates[1]])
         setFloorPlan(null)
        // await fetchBuildings(event.target.value.venueName)
 
        var arr = []
+       var buildingLayouts = []
        event.buildingList.map(async (bname, idx) => {
            let response = await getBuildingData(event.venueName, bname, floor)
            var lat = 0
@@ -303,9 +306,15 @@ const Home = ({ darkmode, setDarkmode }) => {
               if(arr.length > 1 && arr[0].distance > arr[1].distance) handleChange(event)
               //await handleChangeBuilding(arr[0].buildingName)
            }
+
+            buildingLayouts.push({
+            buildingName: bname,
+            layoutData: response})
+            if(idx == event.buildingList.length-1) setBlayout(buildingLayouts)
         
        })
        setVenue(event)
+       setBackdrop(false)
     };
     const handleChangeBuilding = async (event) => {
         setBackdrop(true)
@@ -313,12 +322,12 @@ const Home = ({ darkmode, setDarkmode }) => {
         setFloor('ground')
         setValue()
        // console.log(venues)
-        let response = await getBuildingData(venue.venueName || venues.data[0].data.venueName, event, floor)
+        let response = await getBuildingData(venue ? venue.venueName : venues.data[0].data.venueName, event, floor)
         //console.log(response)
         setFloorPlan(response)
-        response = await getRoomsData(venue.venueName || venues.data[0].data.venueName, event, floor)
+        response = await getRoomsData(venue ? venue.venueName : venues.data[0].data.venueName, event, floor)
         setRooms(response)
-        getGlobalCoords(venue.venueName || venues.data[0].data.venueName, event, setGlobalCoords, setLandmarks)
+        getGlobalCoords(venue ? venue.venueName : venues.data[0].data.venueName, event, setGlobalCoords, setLandmarks)
         setBackdrop(false)
     }
 
@@ -347,12 +356,26 @@ const Home = ({ darkmode, setDarkmode }) => {
     const handleBack = () => {
         if(openSettings) setOpenSettings(false)
         else {
-            if(building) setBuilding(null)
-            if(!building && (venue||sortedblist)) {
+            if(building || globalCoords) {
+                setBuilding(null)
+                setGlobalCoords(null)
+            }
+            else if(venue || blayout || sortedblist) {
+                setVenue(null)
+                setBlayout(null)
+                setSortedblist(null)
+            }
+
+            /*if(!building && (venue||sortedblist)) {
                 setVenue(null)
                 setSortedblist(null)
-                setFloorPlan(null)
             }
+            if(sortedblist && globalCoords) {
+                setGlobalCoords()
+                console.log(venues)
+                console.log(sortedblist)
+                
+            }*/
         }
     }
 
@@ -374,6 +397,7 @@ const Home = ({ darkmode, setDarkmode }) => {
         setBackdrop(true)
         setVenue(venues.data[0].data)
         var arr = []
+        var buildingLayouts = []
         venues.data[0].data.buildingList.map(async (bname, idx) => {
             let response = await getBuildingData(venues.data[0].data.venueName, bname, floor)
             var lat = 0
@@ -397,6 +421,10 @@ const Home = ({ darkmode, setDarkmode }) => {
                setSortedblist(arr)
                await handleChangeBuilding(arr[0].buildingName)
             }
+            buildingLayouts.push({
+            buildingName: bname,
+            layoutData: response})
+            if(idx == venues.data[0].data.buildingList.length-1) setBlayout(buildingLayouts)
         })
         setBackdrop(false)
         
@@ -562,6 +590,7 @@ const Home = ({ darkmode, setDarkmode }) => {
                 </Box>
              }
             {
+                venue &&
                 sortedblist &&
                 !openSettings &&
                 <Box className={classes.container} style={{background: !darkmode ? '#efefef' : '#222'}}>
@@ -603,6 +632,12 @@ const Home = ({ darkmode, setDarkmode }) => {
                     handleChange={handleChange}
                     sortedblist={sortedblist}
                     setVenue={setVenue}
+                    handleChangeBuilding={handleChangeBuilding}
+                    blayout={blayout}
+                    setBlayout={setBlayout}
+                    autoselect={autoselect}
+                    searchV={searchv}
+                    searchb={searchb}
                     />
             }
             {
